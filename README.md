@@ -1,4 +1,4 @@
-# HiddenFoodFact
+# Hidden Fact of FOOD
 Bookdown source files for EDAV final project
 
 In this project we are interested in figuring out trends and patterns of nutrition information of food products in supermarkets over the world. We chose to use the Open Food Facts database to obtain nutrition information, countries, supermarkets, brands, serving size, categories etc. Three main questions we would like to answers are
