@@ -1,11 +1,15 @@
 # Data transformation
 
 We directly download the free dataset from [Open Food Facts - Word](https://world.openfoodfacts.org/) website and import it into rstudio.
+
+The dimension of the dataset is: 
 ```{r echo=FALSE,warning=FALSE}
 # Read the tsv file
 df <- data.table::fread(input="en.openfoodfacts.org.products.tsv",colClasses = c('code'='character'))
 dim(df)
 ```
+
+**356001 observations and 163 features.** 
 
 ```{r setup, include=FALSE}
 # this prevents package loading message from appearing in the rendered version of your problem set

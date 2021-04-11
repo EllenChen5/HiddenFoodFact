@@ -50,6 +50,11 @@
 
 
 
+<script src="libs/htmlwidgets-1.5.3/htmlwidgets.js"></script>
+<link href="libs/wordcloud2-0.0.1/wordcloud.css" rel="stylesheet" />
+<script src="libs/wordcloud2-0.0.1/wordcloud2-all.js"></script>
+<script src="libs/wordcloud2-0.0.1/hover.js"></script>
+<script src="libs/wordcloud2-binding-0.2.1/wordcloud2.js"></script>
 
 
 
@@ -122,19 +127,20 @@
 <p>First we get the percentages of missing values per feature, and stored the percentages in variable called <code>missing_values</code>. We found the missing values are either in the form of ‘na’ or blank.</p>
 <div id="graph-i." class="section level2">
 <h2><span class="header-section-number">4.1</span> Graph I.</h2>
-<p>The first graph shows the percentage of missing values per feature:
-<img src="finalproj_files/figure-html/unnamed-chunk-9-1.png" width="1536" />
+<p>The first graph shows the percentage of missing values per feature:</p>
+<p><img src="finalproj_files/figure-html/unnamed-chunk-21-1.png" width="1536" />
 We use percentage plot later as a reference to drop features with too many missing values.</p>
 </div>
 <div id="graph-ii." class="section level2">
 <h2><span class="header-section-number">4.2</span> Graph II.</h2>
-<p>The second graph shows the missing values by variable:
-<img src="finalproj_files/figure-html/unnamed-chunk-10-1.png" width="768" />
+<p>The second graph shows the missing values by variable:</p>
+<p><img src="finalproj_files/figure-html/unnamed-chunk-22-1.png" width="768" />
 This one is easier to tell row/column missing patterns by observing links between missing values for different features.</p>
 </div>
 <div id="feature-engineering" class="section level2">
 <h2><span class="header-section-number">4.3</span> Feature Engineering</h2>
 <p>We drop all the features which have more than 75% missing values to avoid ending up with misleading results. 77 columns are dropped. We go from 163 columns to 86 columns.</p>
+<pre><code>## NULL</code></pre>
 
 </div>
 </div>

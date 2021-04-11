@@ -41,6 +41,7 @@ missing_values <- df %>%
 
 ## Graph I.
 The first graph shows the percentage of missing values per feature: 
+
 ```{r fig.width=16,fig.height=8}
 levels <- (missing_values  %>% filter(na == TRUE) %>% arrange(desc(pct)))$key
 
@@ -58,6 +59,7 @@ We use percentage plot later as a reference to drop features with too many missi
 
 ## Graph II.
 The second graph shows the missing values by variable: 
+
 ```{r fig.width=8,fig.height=16}
 # One other way of visulizing the missing values is by plotting each row of the dataset to get further insights. This plot lets you find patterns which cannot be found with our bar chart. You can see links between missing values for different features.
 
@@ -82,9 +84,9 @@ This one is easier to tell row/column missing patterns by observing links betwee
 
 ## Feature Engineering 
 We drop all the features which have more than 75% missing values to avoid ending up with misleading results. 77 columns are dropped. We go from 163 columns to 86 columns. 
+
 ```{r feature engineering}
 df2 <- df[ , which(colMeans(!is.na(df)) > 0.75)]
-# dim(df2)
-
+dim(df2)
 #write.csv(df2, 'foodfact.csv') 
 ```

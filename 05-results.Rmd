@@ -27,7 +27,6 @@ nutrition <- nutrition %>%
   mutate(energy_100g = as.numeric(.$energy_100g))%>%
   select(countries_en, energy_100g)
 
-head(nutrition)
 ```
 
 
@@ -80,7 +79,7 @@ vitamins_countries <-
   drop_na()%>%
   gather(key = "vitamins",value = "val",-countries_en)
 
-vitamins_countries
+# vitamins_countries
 ```
 
 
@@ -117,14 +116,14 @@ write.csv(vitamins_proportion,"vitamins_proportion.csv")
 vitamins_proportion
 ```
 
-```{r fig.width=20,fig.height=10}
+```{r fig.width=18,fig.height=8}
 proportion%>%
   ggplot(aes(x = vitamins,y = proportion,fill=countries_en))+
   geom_bar(stat = "identity",position = "dodge",color="black")+
   scale_fill_brewer(palette = "RdYlBu")+
   ggtitle("Proporation of Vitamins in different countries")+
-  theme(plot.title = element_text(size=40, hjust = 0.5),
-        text = element_text(size=25))
+  theme(plot.title = element_text(size=30, hjust = 0.5),
+        text = element_text(size=15))
 ```
 
 This is the proportion of vitamins family in each countries so that we can observe more clearly on the proportion of vitamins. Still we can draw a similar conclusion that Vitamin C take a higher proportion among all foods than other vitamins.
@@ -325,17 +324,16 @@ us_df_words$word[1:10] #top 6 words of ordinary products in the US supermarket
 
 set.seed(5702)
 w1<-wordcloud2(data = us_df_words_keto, color='random-light', backgroundColor="green")
-#htmlwidgets::saveWidget(w1,"1.html",selfcontained = F)
-w2<-wordcloud2(data = us_df_words,color='random-light', backgroundColor="black")
-#htmlwidgets::saveWidget(w2,"2.html",selfcontained = F)
-```
 
+w2<-wordcloud2(data = us_df_words, size=0.6, color='random-light', backgroundColor="black")
+```
 ```{r}
-webshot::webshot("1.html",'1.png',vwidth=700,vheight=500,delay=5)
-webshot::webshot("2.html",'2.png',vwidth=700,vheight=500,delay=5)
+w1
 ```
 
 
+
+![](us_market.png)
 
 ```{r}
 # Word Clouds for Keto-friendly and all Product sold in France supermarket
@@ -392,14 +390,15 @@ fr_df_words_keto$word[1:10] #top 10 words of Keto-friendly products in the Frenc
 fr_df_words$word[1:10] #top 10 words of ordinary products in the French supermarket
 
 set.seed(5702)
-w3<-wordcloud2(data = fr_df_words_keto, color='random-light', backgroundColor="green")
-#htmlwidgets::saveWidget(w3,"3.html",selfcontained = F)
-w4<-wordcloud2(data = fr_df_words, color='random-light', backgroundColor="black")
-#htmlwidgets::saveWidget(w4,"4.html",selfcontained = F)
+w3<-wordcloud2(data = fr_df_words_keto, size=0.8, color='random-light', backgroundColor="green")
+w4<-wordcloud2(data = fr_df_words, size=0.7, color='random-light', backgroundColor="black")
 ```
 
-```{r}
-webshot::webshot("3.html",'3.png',vwidth=700,vheight=500,delay=5)
-webshot::webshot("4.html",'4.png',vwidth=700,vheight=500,delay=5)
-```
 
+![](fr_keto.png)
+
+
+
+![](fr_market.png)
+
+*Disclaimer: The last three wordclouds are screenshot pictures from our terminal. Due to the limitations of plotting interactive wordcloud on Rmarkdown (cap 1), we choose to use inserted pictures of remaining wordclouds we made to solve this issue.*
