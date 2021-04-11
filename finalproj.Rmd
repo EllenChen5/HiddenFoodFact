@@ -1,3 +1,237 @@
+--- 
+title: "Hidden Fact of Food Market"
+author: "Chenhui Mao, Yena Lee, Ellen Chen"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+---
+```{r include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE
+)
+```
+
+# Introduction
+
+In this project we are interested in figuring out trends and patterns of nutrition information of food products in supermarkets over the world. We chose to use the Open Food Facts database to obtain nutrition information, countries, supermarkets, brands, serving size, categories etc. Three main questions we would like to answers are
+
+  + How are the levels of energy and vitamins containing food products in markets different among different countries? We want to know if there exist patterns in the levels of energy and each vitamin in different countries.
+
+  + Which country eats the most sugar? We compare sugar levels of products in different countries and see if the countries with products of generally high sugar level also appear on Diabetes prevalence country ranking.
+
+  + What are the most frequent keywords in a Keto-friendly product in the US and France supermarkets? With Keto Certified standards, we label Keto-friendly products in markets and create keyword maps called WordClouds to compare the most frequent keywords used in ordinary products and Keto-friendly products in a specific country.
+
+<!--chapter:end:index.Rmd-->
+
+```{r include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE
+)
+```
+# Data sources
+
+## Background
+After several times of brainstorming, our group found all three of us interested in food security and healthy diet. Ellen found a website called [Open Food Facts - Word](https://world.openfoodfacts.org/), which provides free open database of food products with ingredients, allergens, nutrition facts and all the tidbits of information we can find on product labels. With rich content we can obtain, we reached a consensus of working on the final project related to FOODS. 
+
+One thing to be noted about the website is that: all data are contributed by the public:
+
+*"Open Food Facts is a food products database made by everyone, for everyone. You can use it to make better food choices, and as it is open data, anyone can re-use it for any purpose." (Quoted)*
+
+
+## About the Dataset
+The original thought was to scrape all items on this website until we found the dataset is available on this link <https://world.openfoodfacts.org/data>. 
+
+The *dataset* contains 163 variables(features) and 356,001 records, Basically we can divide those variables into the following fields:
+
+#### General information
+Including information that uniquely identify the products. Those information include product code, url, etc. 
+
+||||||
+|----|----|----|----|----|
+|code|url|creator|creator_t|creator_datetime|
+|last_modified_t|last_modified_datetime|product_name|generic_name|quantity|
+
+#### Tags
+This part contains tags information that tell us about things, for example, where the product is from? What is its brands? Where it is sold to?
+
+||||||
+|----|----|----|----|----|----|
+|packaging|packaging_tags|brands|brands_tags|categories|categories_tags|
+|categories_fr|origins|origins_tags|manufacturing_places|manufacturing_places_tags|labels|
+|labels_tags|labels_fr|emb_codes|emb_codes_tags|first_packaging_code_geo|cities|
+|cities_tags|purchase_places|stores|countries|countries_tags|countries_fr|
+
+#### Ingredients
+As the name suggests, it contains ingredients of the product.
+
+||||
+|----|----|----|
+|ingredients_text|traces|traces_tags|
+
+#### nutrition facts
+Also as the name suggests, it contains the nutrition facts that is visible almost in any food products. One thing need to be noted in this part, all variables in this part are with a suffix of `"_100g"` which means the amount of nutriment for 100g or 100ml of product.
+
+Because there are too many variables in this part, so, I just list few of which.
+
+||||||
+|----|----|----|----|----|
+|energy_100g|energy-kj_100g|energy-kcal_100g|proteins_100g|...|
+
+#### Others
+
+There is no general fields for variables in this part.
+
+|||||
+|----|----|----|----|
+|serving_size|no_nutriments|additives_n|additives|
+|additives_tags|ingredients_from_palm_oil_n|ingredients_from_palm_oil|ingredients_from_palm_oil_tags|
+|ingredients_that_may_be_from_palm_oil_n|ingredients_that_may_be_from_palm_oil|ingredients_that_may_be_from_palm_oil_tags|nutrition_grade_fr|
+|main_category|main_category_fr|image_url|image_small_url|
+
+
+## Observation
+Due to the large amount of variables that can be observed from this dataset, we hope by some means we can eliminate part of the variables. Luckily, one observation that can be generated from this dataset is that we found that there are a lot of duplicate variables that end with a certain suffix like `brands` and `brands-tag`. They basically describe the same information but with different recording methods. For example in `brands` an item is *"Bob's Red Mill"*, while in `brands-tag` that item becomes *"bob-s-red-mill"*. That situation happens to most of the variables with suffix like `_tag`, `_fr`, `_t`, `_date`,... Some may even use different measurements like `energy_100g`, `energy-kj_100g` and `energy-kcal_100g`. If we just ignore it, that will undoubtedly add to our burden when processing the data.
+
+Therefore, when we choose variables, we avoid choosing ones with those suffixes.
+
+
+
+<!--chapter:end:02-data.Rmd-->
+
+```{r include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE
+)
+```
+# Data transformation
+
+We directly download the free dataset from [Open Food Facts - Word](https://world.openfoodfacts.org/) website and import it into rstudio.
+```{r echo=FALSE,warning=FALSE}
+# Read the tsv file
+df <- data.table::fread(input="en.openfoodfacts.org.products.tsv",colClasses = c('code'='character'))
+dim(df)
+```
+
+```{r setup, include=FALSE}
+# this prevents package loading message from appearing in the rendered version of your problem set
+knitr::opts_chunk$set(warning = FALSE, 
+                      message = FALSE)
+```
+
+<!--chapter:end:03-cleaning.Rmd-->
+
+```{r include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE
+)
+```
+# Missing values
+
+```{r echo=FALSE,warning=FALSE}
+#install package
+if(!require("tidyverse")) install.packages("tidyverse", repos = "http://cran.us.r-project.org")
+if(!require("dplyr")) install.packages("dplyr", repos = "http://cran.us.r-project.org")
+if(!require("tm")) install.packages("tm", repos = "http://cran.us.r-project.org")
+if(!require("SnowballC")) install.packages("SnowballC", repos = "http://cran.us.r-project.org")
+if(!require("wordcloud")) install.packages("wordcloud", repos = "http://cran.us.r-project.org")
+if(!require("RColorBrewer")) install.packages("RColorBrewer", repos = "http://cran.us.r-project.org")
+if(!require("wordcloud2")) install.packages("wordcloud2", repos = "http://cran.us.r-project.org")
+if(!require("htmlwidgets")) install.packages("htmlwidgets", repos = "http://cran.us.r-project.org")
+if(!require("webshot")) install.packages("webshot", repos = "http://cran.us.r-project.org")
+```
+
+```{r echo=FALSE,warning=FALSE}
+#load package
+library(tidyverse)
+library(dplyr)
+library("tm")
+library("SnowballC")
+library("wordcloud")
+library("RColorBrewer")
+library("wordcloud2")
+library(htmlwidgets)
+library(webshot)
+```
+
+First we get the percentages of missing values per feature, and stored the percentages in variable called `missing_values`. We found the missing values are either in the form of 'na' or blank.
+
+```{r echo=FALSE,warning=FALSE}
+missing_values <- df %>%
+  gather(key = "key", value = "val") %>%
+  mutate(na = (is.na(val) | val=="")) %>%
+  group_by(key) %>%
+  mutate(n = n()) %>%
+  group_by(key, n, na) %>%
+  summarise(num.na = n()) %>%
+  mutate(pct = num.na / n * 100)
+```
+
+## Graph I.
+The first graph shows the percentage of missing values per feature: 
+```{r fig.width=16,fig.height=8}
+levels <- (missing_values  %>% filter(na == TRUE) %>% arrange(desc(pct)))$key
+
+percentage_plot <- missing_values %>% ggplot() +
+  geom_bar(aes(x = reorder(key, desc(pct)), y = pct, fill=na), stat = 'identity', alpha=0.8) +
+      scale_x_discrete(limits = levels) +
+      scale_fill_manual(name = "", values = c('steelblue', 'tomato3'), labels = c("Missing", "Present")) +
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),title = element_text(size = 30)) +
+      labs(title = "Plot 1: Percentage of missing values", x = "", y = "% of missing values")
+
+percentage_plot
+
+```
+We use percentage plot later as a reference to drop features with too many missing values. 
+
+## Graph II.
+The second graph shows the missing values by variable: 
+```{r fig.width=8,fig.height=16}
+# One other way of visulizing the missing values is by plotting each row of the dataset to get further insights. This plot lets you find patterns which cannot be found with our bar chart. You can see links between missing values for different features.
+
+# If we don't sample rows from our original dataset, due to too many rows, we have 356001 of observations, the row plot exceed the memory size. So we choose to randomly sample 5000 rows from original dataset and get the plot.
+sample_na <- sample_n(df, 5000)
+row.plot <- sample_na %>%
+  mutate(id = row_number()) %>%
+  gather(-id, key = "key", value = "val") %>%
+  mutate(na = is.na(val)) %>%
+  ggplot(aes(key, id, fill = na)) +
+    geom_tile(alpha=0.8) +
+    scale_fill_manual(name = "",
+        values = c('steelblue', 'tomato3'),
+        labels = c("Present", "Missing")) +
+    scale_x_discrete(limits = levels) +
+    labs(x = "", y = "Row Number", title = "Missing values in rows", subtitle = "Randomly select 5000 obs") +
+    coord_flip()
+
+row.plot
+```
+This one is easier to tell row/column missing patterns by observing links between missing values for different features.
+
+## Feature Engineering 
+We drop all the features which have more than 75% missing values to avoid ending up with misleading results. 77 columns are dropped. We go from 163 columns to 86 columns. 
+```{r feature engineering}
+df2 <- df[ , which(colMeans(!is.na(df)) > 0.75)]
+# dim(df2)
+
+#write.csv(df2, 'foodfact.csv') 
+```
+
+<!--chapter:end:04-missing.Rmd-->
+
+```{r include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE
+)
+```
 # Results
 
 ## How Vitamins on Food Markets Vary by Country? 
@@ -185,7 +419,7 @@ sugars_l = c(mean(US_sugars),
             mean(portugal_sugar))
 ```
 
-```{r}
+```{r fig.width=16,fig.height=8}
 df_suagr = data.frame(countries,sugars_l)
 df_suagr$countries = factor(df_suagr$countries, levels = df_suagr$countries) #Comment it, if you want to alphbetically order x-axis
 
@@ -193,8 +427,8 @@ ggplot(df_suagr,aes(x = reorder(countries, -sugars_l), y = sugars_l ))  +
     geom_bar(fill="#4393C3",stat='identity') + 
     scale_y_continuous(name="Sugar/100g", breaks=seq(0,18,2)) +
     ggtitle("Average total sugar content per 100g") +
-    theme(plot.title = element_text(size=12, hjust = 0.5),
-        text = element_text(size=6))+
+    theme(plot.title = element_text(size=45, hjust = 0.5),
+        text = element_text(size=15))+
     xlab("")
 ```
 
@@ -220,7 +454,7 @@ diabetes_pre <- c(
 # Data source: https://data.worldbank.org/indicator/SH.STA.DIAB.ZS
 ```
 
-```{r}
+```{r }
 df_diabetes = data.frame(countries,diabetes_pre)
 df_diabetes$countries = factor(df_diabetes$countries, levels = df_diabetes$countries) #Comment it, if you want to alphbetically order x-axis
 
@@ -402,4 +636,220 @@ w4<-wordcloud2(data = fr_df_words, color='random-light', backgroundColor="black"
 webshot::webshot("3.html",'3.png',vwidth=700,vheight=500,delay=5)
 webshot::webshot("4.html",'4.png',vwidth=700,vheight=500,delay=5)
 ```
+
+
+<!--chapter:end:05-results.Rmd-->
+
+```{r include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE
+)
+```
+# Interactive component
+
+<div id="chart" style="width: 700px; float:left;"></div>
+<div id="text" style="width: 400px; float: left;"></div>
+
+<script src="https://d3js.org/d3.v6.js"></script>
+<script>
+
+      var chart = d3.select("div#chart")
+      chart.style("width: 700px; float:left;")
+      chart.append("h3").text("Proportion of Vitamins among different countries")
+      chart.append("p").text("In this graph you can choose to see the proportion of different vitamins among different countries by simply selecting the countries at the bottom. Also you can see the details of the proportion down there, the number will change as you select different countries.")
+      var text = d3.select("div#text")
+      text.style("width: 400px; float: left;")
+      text.append("h3").text("Countries: ")
+            .append("span").attr("id","countries_en")
+      text.append("p").text("Vitamin A: ")
+            .append("span").attr("id","vitamin_a")
+      text.append("p").text("Vitamin B1: ")
+            .append("span").attr("id","vitamin_b1")
+      text.append("p").text("Vitamin B2: ")
+            .append("span").attr("id","vitamin_b2")
+      text.append("p").text("Vitamin C: ")
+            .append("span").attr("id","vitamin_c")
+      text.append("p").text("Vitamin D: ")
+            .append("span").attr("id","vitamin_d")
+      text.append("p").text("Vitamin E: ")
+            .append("span").attr("id","vitamin_e")
+      function update_text(data,countries_en){
+        d3.select("#countries_en").text(countries_en)
+        var vitamin_a = (Number(data[0])*100).toFixed(2)
+        var vitamin_b1 = (Number(data[1])*100).toFixed(2)
+        var vitamin_b2 = (Number(data[2])*100).toFixed(2)
+        var vitamin_c = (Number(data[3])*100).toFixed(2)
+        var vitamin_d = (Number(data[4])*100).toFixed(2)
+        var vitamin_e = (Number(data[5])*100).toFixed(2)
+        d3.select("#vitamin_a").text(vitamin_a+"%")
+        d3.select("#vitamin_b1").text(vitamin_b1+"%")
+        d3.select("#vitamin_b2").text(vitamin_b2+"%")
+        d3.select("#vitamin_c").text(vitamin_c+"%")
+        d3.select("#vitamin_d").text(vitamin_d+"%")
+        d3.select("#vitamin_e").text(vitamin_e+"%")
+      }
+      function update(data,country) {
+        update_text(data,country)
+        var bars = svg.selectAll("rect")   // data join
+                      .data(data);
+        xScale = d3.scaleBand()
+                    .domain(d3.range(data.length))
+                    .range([0, innerWidth])
+                    .paddingInner(.2);
+
+        yScale = d3.scaleLinear()
+                    .domain([0, 1])
+                    .range([innerHeight, 0])
+        
+        bars.enter()
+            .append("rect")    // add new elements
+            .attr("x", (d, i) => xScale(i))
+            .attr("y", (d, i)=> yScale(d))
+            .attr("width", xScale.bandwidth())
+            .attr("height", d => innerHeight - yScale(d))
+            .attr("fill", "lightgreen")
+          .merge(bars)    // merge
+            .transition()
+            .duration(2000)
+            .attr("x", (d, i) => xScale(i))
+            .attr("y", (d, i)=> yScale(d))
+            .attr("width", xScale.bandwidth())
+            .attr("height", d => innerHeight - yScale(d))
+            .attr("fill", "lightgreen");
+
+    bars.exit().remove();    // remove extra elements
+    }
+      var w = 600;
+      var h = 500;
+      var margin = {top: 30, right: 30, bottom: 30, left: 30};
+      var innerWidth = w - margin.left - margin.right;
+      var innerHeight = h - margin.top - margin.bottom;
+
+      var svg = d3.select("div#chart")
+        .append("svg")
+          .attr("width", w)
+          .attr("height", h);
+
+      d3.csv("https://raw.githubusercontent.com/Maochenhui123/Data/main/d3/vitamins_countries.csv")
+        .then(
+              function(data){
+                console.log(data)
+                var countries = {};
+                var bardata = [];
+                let len = data.length
+                let init_country = data[0].countries_en
+                for(var i=0; i<data.length;i++){
+                  let countries_en = data[i].countries_en
+                  if(data[i].countries_en in countries){
+                    countries[countries_en].push(Number(data[i].proportion).toFixed(5))
+                  }else{
+                    countries[countries_en] = [Number(data[i].proportion).toFixed(5)]
+                  }
+                }
+                
+                bardata = countries[init_country]
+                update_text(bardata,init_country)
+                var xScale = d3.scaleBand()
+                              .domain(d3.range(bardata.length))
+                              .range([0, innerWidth])
+                              .paddingInner(.2);
+
+                var vitamins = d3.scaleBand()
+                                  .range([0, innerWidth])
+                                  .domain(["vitamins.a","vitamins.b1","vitamins.b2","vitamins.c","vitamins.d","vitamins.e"])
+                var yScale = d3.scaleLinear()
+                                .domain([0, 1])
+                                .range([innerHeight, 0])
+
+                var xAxis = d3.axisBottom()
+                      .scale(vitamins);
+                      
+                var yAxis = d3.axisLeft()
+                      .scale(yScale);
+                svg.append("g")
+                    .attr("class", "xAxis")
+                    .attr("transform", `translate (${margin.left}, ${h - margin.bottom})`)
+                    .call(xAxis);
+
+                svg.append("g")
+                    .attr("class", "yAxis")
+                    .attr("transform", `translate (${margin.left}, ${margin.top})`)
+                    .call(yAxis);
+                var bars = svg.append("g")
+                              .attr("id", "plot")
+                              .attr("transform", `translate (${margin.left}, ${margin.top})`)
+                              .selectAll("rect")
+                              .data(bardata);
+
+                bars.enter().append("rect")
+                    .attr("x", (d, i) => xScale(i))
+                    .attr("y", (d, i)=> yScale(d))
+                    .attr("width", xScale.bandwidth())
+                    .attr("height", d => innerHeight - yScale(d))
+                    .attr("fill", "lightgreen")
+                    .append("title")
+                    .text(function(d){
+                      return d;
+                    });
+                    var countries_en = Object.keys(countries)
+                    var selector = d3.select("div#chart")
+                       .append("div").attr("id","interactive")
+                       .append("select").attr("id","bar")
+                       .on("change",function(d){
+                          var selection = document.getElementById("bar");
+                          var country = selection.value;
+                          var data = countries[country]
+                          update(data,country)
+                          d3.selectAll("rect")
+                            .select("title")
+                            .text(function(d){
+                          return d;
+                        });
+                      })
+      
+                    selector.selectAll("option")
+                       .data(countries_en)
+                       .enter().append("option")
+                       .attr("value", d=>d)
+                       .text(d=>d)
+                    }
+                  );
+
+      
+</script>
+
+
+
+
+
+
+
+
+<!--chapter:end:06-interactive.Rmd-->
+
+```{r include=FALSE, cache=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE
+)
+```
+# Conclusion
+
+## Limitations
+In this project, based on the data we had, we mainly focused on 12 countries with the most number of observations as our target. By analyzing the data, we learned how vitamins on food market vary by country and which country has highest average sugar amount. And we made two word clouds for keto-friendly foods on US and France food market. The number of countries we pick is large enough for this project. While to find answers for the global food market, we may need to involve more countries. 
+
+## Future Directions
+In the future, we can relate what we found in this project to other scientific reports towards healthy issues with food. The second part of our project which relates the average sugar amount over countries to the diabetes prevalence is such an example. To extend the third part of our project, we could find more data and scientific findings of how keto-friendly food improve people health (or not). We can look into vitamins deficiency among people and which food rich in vitamins that are recommended for people to consume.
+
+## Lessons Learned
+### Exploratory Data Analysis 
+The way we inspect missing values by plotting two graphs, one for percentage of missing values and one for row/column missing patterns, is a good first step of EDA. From that point, we get familiared with the pattern of missing values in the dataset and drop features which contain too many missing values to guarantee the accuracy and unbiasedness of our future findings.
+
+
+
+
+<!--chapter:end:07-conclusion.Rmd-->
 
