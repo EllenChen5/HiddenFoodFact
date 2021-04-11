@@ -194,7 +194,7 @@ ggplot(df_suagr,aes(x = reorder(countries, -sugars_l), y = sugars_l ))  +
     scale_y_continuous(name="Sugar/100g", breaks=seq(0,18,2)) +
     ggtitle("Average total sugar content per 100g") +
     theme(plot.title = element_text(size=45, hjust = 0.5),
-        text = element_text(size=35))+
+        text = element_text(size=15))+
     xlab("")
 ```
 
