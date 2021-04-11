@@ -419,7 +419,7 @@ sugars_l = c(mean(US_sugars),
             mean(portugal_sugar))
 ```
 
-```{r fig.width=16,fig.height=8}
+```{r}
 df_suagr = data.frame(countries,sugars_l)
 df_suagr$countries = factor(df_suagr$countries, levels = df_suagr$countries) #Comment it, if you want to alphbetically order x-axis
 
@@ -427,8 +427,8 @@ ggplot(df_suagr,aes(x = reorder(countries, -sugars_l), y = sugars_l ))  +
     geom_bar(fill="#4393C3",stat='identity') + 
     scale_y_continuous(name="Sugar/100g", breaks=seq(0,18,2)) +
     ggtitle("Average total sugar content per 100g") +
-    theme(plot.title = element_text(size=45, hjust = 0.5),
-        text = element_text(size=15))+
+    theme(plot.title = element_text(size=12, hjust = 0.5),
+        text = element_text(size=6))+
     xlab("")
 ```
 
@@ -454,7 +454,7 @@ diabetes_pre <- c(
 # Data source: https://data.worldbank.org/indicator/SH.STA.DIAB.ZS
 ```
 
-```{r }
+```{r}
 df_diabetes = data.frame(countries,diabetes_pre)
 df_diabetes$countries = factor(df_diabetes$countries, levels = df_diabetes$countries) #Comment it, if you want to alphbetically order x-axis
 
