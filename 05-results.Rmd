@@ -331,9 +331,15 @@ w2<-wordcloud2(data = us_df_words, size=0.6, color='random-light', backgroundCol
 w1
 ```
 
+WordCloud I. Keto Products on US Market
+
 
 
 ![](us_market.png)
+WordCloud II. Products on US Market
+
+
+
 
 ```{r}
 # Word Clouds for Keto-friendly and all Product sold in France supermarket
@@ -397,8 +403,13 @@ w4<-wordcloud2(data = fr_df_words, size=0.7, color='random-light', backgroundCol
 
 ![](fr_keto.png)
 
+WordCloud III. Keto Products on France Market
+
 
 
 ![](fr_market.png)
+
+WordCloud IV. Products on France Market
+
 
 *Disclaimer: The last three wordclouds are screenshot pictures from our terminal. Due to the limitations of plotting interactive wordcloud on Rmarkdown (cap 1), we choose to use inserted pictures of remaining wordclouds we made to solve this issue.*

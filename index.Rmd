@@ -9,6 +9,8 @@ site: bookdown::bookdown_site
 
 *Are you interested in the ingredients of food that relate to health?*
 
+![](open_food_fact.png) 
+
 In this project we are interested in figuring out trends and patterns of nutritional information of food products in supermarkets over the world. We chose to use the [Open Food Facts - Word](https://world.openfoodfacts.org/) database to obtain nutrition information, countries, supermarkets, brands, serving size, categories etc. 
 
 Three main questions we would like to answers are:
